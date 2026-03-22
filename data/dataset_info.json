@@ -1,4 +1,254 @@
 {
+  "cvdp_ecov_train_sampled_non_reasoning": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_non_reasoning",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_abl_con_stage_0_1_2": {
+    "hf_hub_url": "hez2024/cvdp_ecov_abl_con_stage_0_1_2",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_abl_con_stage_1_2": {
+    "hf_hub_url": "hez2024/cvdp_ecov_abl_con_stage_1_2",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_abl_con_stage_0_1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_abl_con_stage_0_1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_stage_0_ablation_0": {
+    "hf_hub_url": "hez2024/cvdp_ecov_stage_0_ablation_0",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_stage_0_ablation_1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_stage_0_ablation_1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_stage_0_ablation_2": {
+    "hf_hub_url": "hez2024/cvdp_ecov_stage_0_ablation_2",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_stage2_direct_self_worst_sampled": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_stage2_direct_self_worst_sampled",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_stage2_direct_self_worst": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_stage2_direct_self_worst",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_stage2_self_r2": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_stage2_self_r2",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_stage2_self_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_stage2_self_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_stage2_dagger_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_stage2_dagger_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_stage1_direct_dagger_worst": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_stage1_direct_dagger_worst",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_direct_infer_direct_best": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_direct_infer_direct_best",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_direct_infer_direct_worst": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_direct_infer_direct_worst",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_direct_infer_direct_only": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_direct_infer_direct_only",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_ablation_2_worst_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_ablation_2_worst_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_ablation_1_greedy_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_ablation_1_greedy_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_ablation_0_best_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_ablation_0_best_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_dagger_re_react_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_dagger_re_react_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_student_react_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_student_react_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_teacher_react_r1": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_teacher_react_r1",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_dagger_react_r3": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_dagger_react_r3",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_non_reasoning_dagger_react": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_non_reasoning_dagger_react",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
+  "cvdp_ecov_train_sampled_reasoning": {
+    "hf_hub_url": "hez2024/cvdp_ecov_train_sampled_reasoning",
+    "columns": {
+      "prompt": "instruction",
+      "query": null,
+      "response": "output",
+      "system": "system",
+      "history": "history"
+    }
+  },
   "identity": {
     "file_name": "identity.json"
   },

@@ -1,0 +1,52 @@
+### model
+model_name_or_path: Qwen/Qwen3-4B-Instruct-2507
+#model_name_or_path: hez2024/llm4cov_qwen3_4b_non_reasoning_4g_6b_1e
+#model_name_or_path: hez2024/llm4cov_qwen3_4b_stage1_direct_dagger_worst_4g_6b_1e
+trust_remote_code: true
+  # add_special_tokens: "<think>,</think>"
+
+### method
+stage: sft
+do_train: true
+finetuning_type: full
+deepspeed: examples/deepspeed/ds_z3_offload_config.json
+
+### dataset
+dataset: cvdp_ecov_abl_con_stage_0_1_2
+template: qwen3_nothink
+cutoff_len: 40960
+  #max_samples: 8 # debug
+mask_history: true
+packing: false
+overwrite_cache: false
+preprocessing_num_workers: 16
+
+### output
+output_dir: /data/hejia/sft_backup/qwen3_4b_abl_con_stage_0_1_2_4g_6b_1e
+logging_steps: 1
+save_steps: 200
+plot_loss: true
+overwrite_output_dir: false
+
+### train
+per_device_train_batch_size: 1
+gradient_accumulation_steps: 4      # adjust to reach target global batch
+learning_rate: 1.0e-5
+num_train_epochs: 1.0               # start with 3, extend if needed
+lr_scheduler_type: cosine
+warmup_ratio: 0.03
+bf16: true
+ddp_timeout: 180000000
+seed: 42
+optim: adamw_torch
+flash_attn: fa2
+
+report_to: wandb
+run_name: qwen3_4b_abl_con_stage_0_1_2_4g_6b_1e
+
+# optional
+### eval (optional, minimal)
+# val_size: 0.02
+# per_device_eval_batch_size: 1
+# eval_strategy: steps
+# eval_steps: 2000
