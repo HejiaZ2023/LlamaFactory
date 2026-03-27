@@ -528,7 +528,17 @@ class PairwiseDataCollatorWithPadding(MultiModalDataCollatorForSeq2Seq):
                 }
                 concatenated_features.append(target_feature)
 
-        return super().__call__(concatenated_features)
+        batch = super().__call__(concatenated_features)
+        batch["score_chosen"] = torch.tensor(
+            [feature.get("score_chosen", float("nan")) for feature in features], dtype=torch.float32
+        )
+        batch["score_rejected"] = torch.tensor(
+            [feature.get("score_rejected", float("nan")) for feature in features], dtype=torch.float32
+        )
+        batch["score_diff"] = torch.tensor(
+            [feature.get("score_diff", float("nan")) for feature in features], dtype=torch.float32
+        )
+        return batch
 
 
 @dataclass

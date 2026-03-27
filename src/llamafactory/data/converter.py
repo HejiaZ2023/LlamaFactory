@@ -75,6 +75,21 @@ class DatasetConverter:
 
         return medias
 
+    def _get_score(self, example: dict[str, Any], score_key: str | None) -> float:
+        r"""Return a numeric score if present, otherwise NaN for downstream fallback."""
+        if score_key is None:
+            return float("nan")
+
+        score = example.get(score_key)
+        if score is None:
+            return float("nan")
+
+        try:
+            return float(score)
+        except (TypeError, ValueError):
+            logger.warning_rank0_once(f"Invalid score value in column `{score_key}`: {score}. Using NaN instead.")
+            return float("nan")
+
     @abstractmethod
     def __call__(self, example: dict[str, Any]) -> dict[str, Any]:
         r"""Convert a single example in the dataset to the standard format."""
@@ -124,6 +139,8 @@ class AlpacaDatasetConverter(DatasetConverter):
             "_response": response,
             "_system": example[self.dataset_attr.system] if self.dataset_attr.system else "",
             "_tools": example[self.dataset_attr.tools] if self.dataset_attr.tools else "",
+            "_score_chosen": self._get_score(example, self.dataset_attr.score_chosen),
+            "_score_rejected": self._get_score(example, self.dataset_attr.score_rejected),
             "_images": self._find_medias(example[self.dataset_attr.images]) if self.dataset_attr.images else None,
             "_videos": self._find_medias(example[self.dataset_attr.videos]) if self.dataset_attr.videos else None,
             "_audios": self._find_medias(example[self.dataset_attr.audios]) if self.dataset_attr.audios else None,
@@ -220,6 +237,8 @@ class SharegptDatasetConverter(DatasetConverter):
             "_response": response,
             "_system": system,
             "_tools": example[self.dataset_attr.tools] if self.dataset_attr.tools else "",
+            "_score_chosen": self._get_score(example, self.dataset_attr.score_chosen),
+            "_score_rejected": self._get_score(example, self.dataset_attr.score_rejected),
             "_images": self._find_medias(example[self.dataset_attr.images]) if self.dataset_attr.images else None,
             "_videos": self._find_medias(example[self.dataset_attr.videos]) if self.dataset_attr.videos else None,
             "_audios": self._find_medias(example[self.dataset_attr.audios]) if self.dataset_attr.audios else None,
@@ -360,6 +379,8 @@ class OpenAIDatasetConverter(DatasetConverter):
             "_response": response,
             "_system": system,
             "_tools": tools,
+            "_score_chosen": self._get_score(example, self.dataset_attr.score_chosen),
+            "_score_rejected": self._get_score(example, self.dataset_attr.score_rejected),
             "_images": self._find_medias(example[self.dataset_attr.images]) if self.dataset_attr.images else None,
             "_videos": self._find_medias(example[self.dataset_attr.videos]) if self.dataset_attr.videos else None,
             "_audios": self._find_medias(example[self.dataset_attr.audios]) if self.dataset_attr.audios else None,
@@ -403,6 +424,8 @@ def align_dataset(
     _response: [{"role": "assistant", "content": "..."}] * N (N > 1 for ranking dataset)
     _system: "..."
     _tools: "..."
+    _score_chosen: float (NaN if absent)
+    _score_rejected: float (NaN if absent)
     _images: []
     _videos: []
     _audios: []

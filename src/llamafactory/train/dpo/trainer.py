@@ -184,12 +184,44 @@ class CustomDPOTrainer(DPOTrainer):
         )
         return bco_loss
 
+    def _get_beta_star(self, score_diff: Optional["torch.Tensor"], reference_logratios: "torch.Tensor") -> "torch.Tensor":
+        r"""Return per-example beta for score-weighted DPO, falling back to the constant beta when scores are absent."""
+        beta_star = torch.full_like(reference_logratios, self.beta)
+        if score_diff is None:
+            return beta_star
+
+        score_diff = score_diff.to(reference_logratios.device, dtype=reference_logratios.dtype)
+        valid_scores = torch.isfinite(score_diff)
+        if valid_scores.any():
+            beta_star = torch.where(valid_scores, self.beta * score_diff.clamp_min(0), beta_star)
+
+        return beta_star
+
+    def beta_weighted_dpo_loss(
+        self,
+        policy_chosen_logps: "torch.Tensor",
+        policy_rejected_logps: "torch.Tensor",
+        reference_chosen_logps: "torch.Tensor",
+        reference_rejected_logps: "torch.Tensor",
+        score_diff: Optional["torch.Tensor"] = None,
+    ) -> tuple["torch.Tensor", "torch.Tensor", "torch.Tensor"]:
+        r"""Compute sigmoid DPO with a per-example beta scaled by score differences."""
+        chosen_logratios = policy_chosen_logps - reference_chosen_logps
+        rejected_logratios = policy_rejected_logps - reference_rejected_logps
+        logratio_diff = chosen_logratios - rejected_logratios
+        beta_star = self._get_beta_star(score_diff, logratio_diff)
+        losses = -F.logsigmoid(beta_star * logratio_diff)
+        chosen_rewards = beta_star * chosen_logratios.detach()
+        rejected_rewards = beta_star * rejected_logratios.detach()
+        return losses, chosen_rewards, rejected_rewards
+
     def compute_preference_loss(
         self,
         policy_chosen_logps: "torch.Tensor",
         policy_rejected_logps: "torch.Tensor",
         reference_chosen_logps: Optional["torch.Tensor"],
         reference_rejected_logps: Optional["torch.Tensor"],
+        score_diff: Optional["torch.Tensor"] = None,
     ) -> tuple["torch.Tensor", "torch.Tensor", "torch.Tensor"]:
         r"""Compute loss for preference learning."""
         if not self.finetuning_args.use_ref_model:
@@ -203,9 +235,18 @@ class CustomDPOTrainer(DPOTrainer):
             chosen_rewards = self.beta * policy_chosen_logps.to(self.accelerator.device).detach()
             rejected_rewards = self.beta * policy_rejected_logps.to(self.accelerator.device).detach()
         else:
-            losses, chosen_rewards, rejected_rewards = self.dpo_loss(
-                policy_chosen_logps, policy_rejected_logps, reference_chosen_logps, reference_rejected_logps
-            )
+            if self.loss_type == "sigmoid":
+                losses, chosen_rewards, rejected_rewards = self.beta_weighted_dpo_loss(
+                    policy_chosen_logps,
+                    policy_rejected_logps,
+                    reference_chosen_logps,
+                    reference_rejected_logps,
+                    score_diff,
+                )
+            else:
+                losses, chosen_rewards, rejected_rewards = self.dpo_loss(
+                    policy_chosen_logps, policy_rejected_logps, reference_chosen_logps, reference_rejected_logps
+                )
 
             if self.bco_gemma > 1e-6:
                 bco_losses = self.bco_loss(
@@ -282,6 +323,9 @@ class CustomDPOTrainer(DPOTrainer):
     ) -> tuple["torch.Tensor", dict[str, "torch.Tensor"]]:
         r"""Compute the DPO loss and other metrics for the given batch of inputs for train or test."""
         metrics = {}
+        score_chosen = batch.pop("score_chosen", None)
+        score_rejected = batch.pop("score_rejected", None)
+        score_diff = batch.pop("score_diff", None)
 
         model_output = self.concatenated_forward(model, batch)
         policy_chosen_logps = model_output["chosen_logps"]
@@ -296,6 +340,7 @@ class CustomDPOTrainer(DPOTrainer):
             policy_rejected_logps,
             reference_chosen_logps,
             reference_rejected_logps,
+            score_diff,
         )
         sft_loss = -policy_chosen_logps_avg
         if self.ftx_gamma > 1e-6:
@@ -310,6 +355,12 @@ class CustomDPOTrainer(DPOTrainer):
         metrics[f"{prefix}logps/rejected"] = policy_rejected_logps.mean().item()
         metrics[f"{prefix}logits/chosen"] = policy_chosen_logits.mean().item()
         metrics[f"{prefix}logits/rejected"] = policy_rejected_logits.mean().item()
+        if score_diff is not None:
+            valid_scores = torch.isfinite(score_diff)
+            if valid_scores.any():
+                metrics[f"{prefix}scores/chosen"] = score_chosen[valid_scores].mean().item()
+                metrics[f"{prefix}scores/rejected"] = score_rejected[valid_scores].mean().item()
+                metrics[f"{prefix}scores/diff"] = score_diff[valid_scores].mean().item()
         if self.loss_type == "orpo":
             metrics[f"{prefix}sft_loss"] = sft_loss.mean().item()
             metrics[f"{prefix}odds_ratio_loss"] = ((losses - sft_loss) / self.beta).mean().item()

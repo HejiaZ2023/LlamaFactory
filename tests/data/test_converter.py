@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
+
 import pytest
 
 from llamafactory.data import Role
@@ -30,7 +32,8 @@ def test_alpaca_converter():
         "output": "The answer is 7.",
     }
     dataset_converter = get_dataset_converter("alpaca", dataset_attr, data_args)
-    assert dataset_converter(example) == {
+    result = dataset_converter(example)
+    assert {key: value for key, value in result.items() if not key.startswith("_score_")} == {
         "_prompt": [{"role": Role.USER.value, "content": "Solve the math problem.\n3 + 4"}],
         "_response": [{"role": Role.ASSISTANT.value, "content": "The answer is 7."}],
         "_system": "",
@@ -39,6 +42,8 @@ def test_alpaca_converter():
         "_videos": None,
         "_audios": None,
     }
+    assert math.isnan(result["_score_chosen"])
+    assert math.isnan(result["_score_rejected"])
 
 
 @pytest.mark.runs_on(["cpu", "mps"])
@@ -53,11 +58,47 @@ def test_sharegpt_converter():
         ]
     }
     dataset_converter = get_dataset_converter("sharegpt", dataset_attr, data_args)
-    assert dataset_converter(example) == {
+    result = dataset_converter(example)
+    assert {key: value for key, value in result.items() if not key.startswith("_score_")} == {
         "_prompt": [{"role": Role.USER.value, "content": "Solve the math problem.\n3 + 4"}],
         "_response": [{"role": Role.ASSISTANT.value, "content": "The answer is 7."}],
         "_system": "You are a helpful assistant.",
         "_tools": "",
+        "_images": None,
+        "_videos": None,
+        "_audios": None,
+    }
+    assert math.isnan(result["_score_chosen"])
+    assert math.isnan(result["_score_rejected"])
+
+
+@pytest.mark.runs_on(["cpu", "mps"])
+def test_sharegpt_pairwise_converter_with_scores():
+    dataset_attr = DatasetAttr("hf_hub", "llamafactory/tiny-ranking-dataset")
+    dataset_attr.ranking = True
+    dataset_attr.chosen = "chosen"
+    dataset_attr.rejected = "rejected"
+    dataset_attr.score_chosen = "score_chosen"
+    dataset_attr.score_rejected = "score_rejected"
+    data_args = DataArguments()
+    example = {
+        "conversations": [{"from": "human", "value": "Question"}],
+        "chosen": {"from": "gpt", "value": "Better answer"},
+        "rejected": {"from": "gpt", "value": "Worse answer"},
+        "score_chosen": 4.0,
+        "score_rejected": 1.5,
+    }
+    dataset_converter = get_dataset_converter("sharegpt", dataset_attr, data_args)
+    assert dataset_converter(example) == {
+        "_prompt": [{"role": Role.USER.value, "content": "Question"}],
+        "_response": [
+            {"role": Role.ASSISTANT.value, "content": "Better answer"},
+            {"role": Role.ASSISTANT.value, "content": "Worse answer"},
+        ],
+        "_system": "",
+        "_tools": "",
+        "_score_chosen": 4.0,
+        "_score_rejected": 1.5,
         "_images": None,
         "_videos": None,
         "_audios": None,

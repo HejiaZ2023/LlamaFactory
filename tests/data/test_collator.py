@@ -21,7 +21,11 @@ from PIL import Image
 from transformers import AutoConfig, AutoModelForImageTextToText
 
 from llamafactory.data import get_template_and_fix_tokenizer
-from llamafactory.data.collator import MultiModalDataCollatorForSeq2Seq, prepare_4d_attention_mask
+from llamafactory.data.collator import (
+    MultiModalDataCollatorForSeq2Seq,
+    PairwiseDataCollatorWithPadding,
+    prepare_4d_attention_mask,
+)
 from llamafactory.extras.constants import IGNORE_INDEX
 from llamafactory.extras.packages import is_transformers_version_greater_than
 from llamafactory.hparams import get_infer_args
@@ -134,6 +138,40 @@ def test_multimodal_collator():
             batch_input[k] = batch_input[k][1:]
 
         assert batch_input[k].eq(torch.tensor(expected_input[k])).all()
+
+
+@pytest.mark.runs_on(["cpu", "mps"])
+def test_pairwise_collator_keeps_scores():
+    model_args, data_args, *_ = get_infer_args({"model_name_or_path": TINY_LLAMA3, "template": "default"})
+    tokenizer_module = load_tokenizer(model_args)
+    template = get_template_and_fix_tokenizer(tokenizer_module["tokenizer"], data_args)
+    data_collator = PairwiseDataCollatorWithPadding(
+        template=template,
+        pad_to_multiple_of=8,
+        label_pad_token_id=IGNORE_INDEX,
+        **tokenizer_module,
+    )
+    q = IGNORE_INDEX
+    features = [
+        {
+            "chosen_input_ids": [1, 2, 3],
+            "chosen_attention_mask": [1, 1, 1],
+            "chosen_labels": [q, 2, 3],
+            "rejected_input_ids": [1, 4],
+            "rejected_attention_mask": [1, 1],
+            "rejected_labels": [q, 4],
+            "score_chosen": 3.5,
+            "score_rejected": 1.0,
+            "score_diff": 2.5,
+            "images": None,
+            "videos": None,
+            "audios": None,
+        }
+    ]
+    batch_input = data_collator(features)
+    assert batch_input["score_chosen"].eq(torch.tensor([3.5], dtype=torch.float32)).all()
+    assert batch_input["score_rejected"].eq(torch.tensor([1.0], dtype=torch.float32)).all()
+    assert batch_input["score_diff"].eq(torch.tensor([2.5], dtype=torch.float32)).all()
 
 
 def _make_packed_feature(

@@ -46,6 +46,8 @@ class DatasetAttr:
     # dpo columns
     chosen: str | None = None
     rejected: str | None = None
+    score_chosen: str | None = None
+    score_rejected: str | None = None
     kto_tag: str | None = None
     # alpaca columns
     prompt: str | None = "instruction"
@@ -79,7 +81,7 @@ class DatasetAttr:
 
         if "columns" in attr:
             column_names = ["prompt", "query", "response", "history", "messages", "system", "tools"]
-            column_names += ["images", "videos", "audios", "chosen", "rejected", "kto_tag"]
+            column_names += ["images", "videos", "audios", "chosen", "rejected", "score_chosen", "score_rejected", "kto_tag"]
             for column_name in column_names:
                 self.set_attr(column_name, attr["columns"])
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
+import math
 from typing import TYPE_CHECKING, Any, Optional
 
 from ...extras import logging
@@ -93,6 +94,16 @@ class PairwiseDatasetProcessor(DatasetProcessor):
             model_inputs["rejected_input_ids"].append(rejected_input_ids)
             model_inputs["rejected_attention_mask"].append([1] * len(rejected_input_ids))
             model_inputs["rejected_labels"].append(rejected_labels)
+            score_chosen = examples["_score_chosen"][i]
+            score_rejected = examples["_score_rejected"][i]
+            if math.isnan(score_chosen) or math.isnan(score_rejected):
+                score_diff = float("nan")
+            else:
+                score_diff = max(score_chosen - score_rejected, 0.0)
+
+            model_inputs["score_chosen"].append(score_chosen)
+            model_inputs["score_rejected"].append(score_rejected)
+            model_inputs["score_diff"].append(score_diff)
             model_inputs["images"].append(examples["_images"][i])
             model_inputs["videos"].append(examples["_videos"][i])
             model_inputs["audios"].append(examples["_audios"][i])
